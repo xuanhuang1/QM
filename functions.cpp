@@ -136,8 +136,21 @@ int readIn(vector<vertex> &v,vector<edge> &e,vector<face> &f, string filename){
 
     cout << "endofboundary check" <<endl;
 
-    // clear out format of neighbor faces
-    /*for (int i=0; i<v.size(); i++) {
+
+
+    /*for (int i = 0; i < v.size(); ++i)
+    {
+    	cout << i <<": ";
+
+            for(int p = 0; p<v[i].neighbors.size(); p++)   
+                cout << v[i].neighbors[p] <<" ";
+            cout <<"endiput"<< endl;
+    }
+
+    cout <<"endiput"<< endl;*/
+
+    // clear out format of neighbor faces, get rid of repetitive vertices in v[i].neighbors
+    for (int i=0; i<v.size(); i++) {
         if(v[i].onBound == 0){
             vector<int> neighborTemp;
             //cout << "v[i].numOfNeighborFace" << v[i].numOfNeighborFace<<endl;
@@ -160,14 +173,14 @@ int readIn(vector<vertex> &v,vector<edge> &e,vector<face> &f, string filename){
                 j = j%(v[i].neighbors.size());
             }
             v[i].neighbors = neighborTemp;
+            
+            /*cout << i <<": ";
 
             for(int p = 0; p<v[i].neighbors.size(); p++)   
                 cout << v[i].neighbors[p] <<" ";
-            cout <<"endiput"<< endl;
+            cout <<"endiput"<< endl;*/
         }
-    }*/
-
-    cout <<"endiput"<< endl;
+    }
 
 
 
@@ -366,7 +379,8 @@ double findShortestDistInStarT(vector<vertex> &v, vector<face> &f, double theX, 
 
         if(i == 0)
             distFinal = distTemp1;
-        if(distFinal > distTemp1);
+        if(distFinal > distTemp1)
+        	distFinal = distTemp1;
     }
 
     return distFinal;

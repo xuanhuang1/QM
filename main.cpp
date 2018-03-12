@@ -43,20 +43,17 @@ void printStats(vector<vertex> &v, vector<face> &f){
 
         //cout << "faces: " << tempAR <<" "<<tempMin <<" "<<tempMax <<endl;
 
-        if(tempAR>ARLARGE){
-            arStats[4] ++;
-        }else if(tempAR>ARLARGE*0.75){
-            arStats[3]++;
-        }else if(tempAR>ARLARGE*0.5){
-            arStats[2]++;
-        }else if(tempAR>ARLARGE*0.25){
-            arStats[1]++;
-        }else arStats[0]++;
+        for (double j = ARPRT-1; j > -1; j--){
+            if(tempAR > ARLARGE*j/(ARPRT-1)){
+                arStats[(int)j]++;
+                break;
+            }
+        }
 
         for (int j = 0; j < ANGPRT; ++j){
-            if((tempMin > j*angleInter) && (tempMin < (j+1)*angleInter+0.01))
+            if((tempMin > j*angleInter) && (!(tempMin > (j+1)*angleInter)) )
                 angMinStats[j]++;
-            if((tempMax > j*angleInter+90) && (tempMax < (j+1)*angleInter+90+0.01))
+            if((tempMax > j*angleInter+90) && (!(tempMax > (j+1)*angleInter+90)))
                 angMaxStats[j]++;
         }
         
@@ -64,13 +61,20 @@ void printStats(vector<vertex> &v, vector<face> &f){
 
     cout <<endl<< "aver: AR " << averAR <<" min "<<averMin <<" max "<<averMax<<endl<<endl;
 
-    for (int i = 1; i < (ARPRT+1); ++i){
+    for (int i = 1; i < (ARPRT); ++i){
         cout << "ar below " << i*ARLARGE*0.25 << ": " << arStats[i-1] 
         <<"   \t" <<int(arStats[i-1]*100/f.size())<<"%\t";
         for (int j = 0; j < 20; ++j)
             if(arStats[i-1]*100/f.size()> j*5) cout <<"*";
         cout<<endl;
     }
+    int i = ARPRT;
+    cout << "ar above " << (i-1)*ARLARGE*0.25 << ": " << arStats[i-1] 
+        <<"   \t" <<int(arStats[i-1]*100/f.size())<<"%\t";
+    for (int j = 0; j < 20; ++j)
+        if(arStats[i-1]*100/f.size()> j*5) cout <<"*";
+    cout<<endl;
+
     cout<<endl;
     for (int i = 1; i < (ANGPRT+1); ++i){
         cout << "minang " << (i-1)*angleInter <<"-" <<(i)*angleInter << ": " << angMinStats[i-1] 
@@ -93,7 +97,7 @@ void printStats(vector<vertex> &v, vector<face> &f){
 
 int main(int argc, char* argv[]){
     if(argc != 5){
-        cout << "Usage: ./test [flag: -Lap -s -q -qStar] inputOff outputOff %%itr" <<endl;
+        cout << "Usage: ./test [flag: -Lap -s -q -qStar -qStar2] inputOff outputOff %%itr" <<endl;
         return 1; 
     }
 
@@ -123,7 +127,7 @@ int main(int argc, char* argv[]){
     cout << "max: " << maxAngle*180/PI << " min: " << minAngle*180/PI<<endl;
     cout << "aspectR: " << aspectratio<<endl;
 
-   printStats(v,f);
+    printStats(v,f);
     
     int a =1;
     float thresh = 3;
@@ -148,7 +152,9 @@ int main(int argc, char* argv[]){
                     thresh = aspectratio /4;
                 }*/
                 smooth2Q(v, f, thresh);
+                cout <<"*";
             }
+            cout <<"\n";
             printf("\n------Ends-----\n" );
 
         }else if(!runFlag.compare("-qStar")){
@@ -160,7 +166,23 @@ int main(int argc, char* argv[]){
                     thresh = aspectratio /4;
                 }*/
                 smooth2QStar(v, f, thresh);
+                cout <<"*";
             }
+            cout <<"\n";
+            printf("\n------Ends-----\n" );
+
+        }else if(!runFlag.compare("-qStar2")){
+            printf("\n------The Smoothing-----\n\n" );
+            for (int i = 0; i < itr; ++i){
+                /*if(aspectratio < 4){
+                    thresh = 1.2;
+                }else if(aspectratio < 8 ){
+                    thresh = aspectratio /4;
+                }*/
+                smooth2QStar2(v, f, thresh);
+                cout <<"*";
+            }
+            cout <<"\n";
             printf("\n------Ends-----\n" );
 
         }else{

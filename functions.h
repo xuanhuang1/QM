@@ -20,10 +20,13 @@
 using namespace std;
 
 int readIn(vector<vertex> &v, vector<edge> &e, vector<face> &f, string filename);
+void faceClean(vector<vertex> &v,vector<face> &f);
 int smoothLapAng(vector<vertex> &v,vector<face> &f);
 void smooth2Star(std::vector<vertex> &v, std::vector<face> &f, double ar);
 void smooth2Q(std::vector<vertex> &v, std::vector<face> &f, double ar);
 void smooth2QStar(std::vector<vertex> &v, std::vector<face> &f, double ar);
+void smooth2QStar2(std::vector<vertex> &v, std::vector<face> &f, double ar);
+
 
 
 
