@@ -104,9 +104,9 @@ void disCheckMovePlan(int i, vector<vertex> &v, vector<face> &f, double moveX, d
             //cout << " dis: "<< dis<<" ordis: "<< ordis<<"\n"<<endl;
         //cout << "dang dis: "<< dis<<" ordis: "<< ordis<<"\n"<<endl;}
     }
-
 }
-void smooth2Q(std::vector<vertex> &v, std::vector<face> &f, double ar){
+
+void smooth2Q(std::vector<vertex> &v, std::vector<face> &f, double ar, double maxThresh, double minThresh){
     // for each face 
     //  find largest angle && divide into two triangles
     //  if angle > 120, do
@@ -122,19 +122,19 @@ void smooth2Q(std::vector<vertex> &v, std::vector<face> &f, double ar){
             double angle = angleOnVertex(v[last], v[self], v[next])*180/PI;
             double dX = (v[next].x - v[last].x);
             double dY = (v[next].y - v[last].y);
-            if(angle > 130){
-                double rat = 100000/angle;
+            if(angle > maxThresh){
+                double rat = angle/100000;
 
-                disCheckMove(last, v, f, dX/rat, dY/rat);
-                disCheckMove(next, v, f, -dX/rat, - dY/rat);
-                disCheckMove(self, v, f, dY/rat, -dX/rat);
+                disCheckMove(last, v, f, dX*rat, dY*rat);
+                disCheckMove(next, v, f, -dX*rat, - dY*rat);
+                disCheckMove(self, v, f, dY*rat, -dX*rat);
 
-            }else if(angle < 30){
-                double rat = 50;
+            }else if(angle < minThresh){
+                double rat = (1.0)/50;
 
-                disCheckMove(last, v, f, -dX/rat,  -dY/rat);
-                disCheckMove(next, v, f, dX/rat,  dY/rat);
-                disCheckMove(self, v, f, -dY/rat,  dX/rat);
+                disCheckMove(last, v, f, -dX*rat,  -dY*rat);
+                disCheckMove(next, v, f, dX*rat,  dY*rat);
+                disCheckMove(self, v, f, -dY*rat,  dX*rat);
 
             }
 
@@ -152,14 +152,25 @@ void smooth2Q(std::vector<vertex> &v, std::vector<face> &f, double ar){
                 selfOffY = dY/rat;
                 disCheckMove(self, v, f, selfOffX, selfOffY);
             }
+            
+            /*if(leftDist / rightDist > 3){
+                selfOffX = (-v[next].x+v[self].x)/rat;
+                selfOffY = (-v[next].y+v[self].y)/rat;
+                disCheckMove(self, v, f, selfOffX, selfOffY);
+            }else if(rightDist / leftDist > 3){
+                selfOffX = (-v[last].x+v[self].x)/rat;
+                selfOffY = (-v[last].y+v[self].y)/rat;
+                disCheckMove(self, v, f, selfOffX, selfOffY);
+            }*/
 
         }   
 
     }
 
-
 }
-void smooth2QStar(std::vector<vertex> &v, std::vector<face> &f, double ar){
+
+
+void smooth2QStar(std::vector<vertex> &v, std::vector<face> &f, double ar, double maxThresh, double minThresh){
     // for each face 
     //  find largest angle && divide into two triangles
     //  if angle > 120, do
@@ -175,14 +186,14 @@ void smooth2QStar(std::vector<vertex> &v, std::vector<face> &f, double ar){
             double angle = angleOnVertex(v[last], v[self], v[next])*180/PI;
             double dX = (v[next].x - v[last].x);
             double dY = (v[next].y - v[last].y);
-            if(angle > 130){
+            if(angle > maxThresh){
                 double rat = 1000/angle;
 
                 disCheckMovePlan(last, v, f, dX/rat, dY/rat, ANGLEMODE);
                 disCheckMovePlan(next, v, f, -dX/rat, - dY/rat, ANGLEMODE);
                 disCheckMovePlan(self, v, f, dY/rat, -dX/rat, ANGLEMODE);
 
-            }else if(angle < 30){
+            }else if(angle < minThresh){
                 double rat = 10;
 
                 disCheckMovePlan(last, v, f, -dX/rat,  -dY/rat, ANGLEMODE);
@@ -220,59 +231,6 @@ void smooth2QStar(std::vector<vertex> &v, std::vector<face> &f, double ar){
         }
     }
 
-
-}
-void smooth2QStar2(std::vector<vertex> &v, std::vector<face> &f, double ar){
-    for (int i=0; i<v.size(); i++) {// for each vertex in mesh
-
-        if(!v[i].onBound){  
-            for(int j= 0; j<v[i].neighbors.size(); j+=2){ // for each inner corner in neihgbor face
-                int self = i;
-                int last = v[i].neighbors[j];
-                int next = v[i].neighbors[(j+2+v[i].neighbors.size())%(v[i].neighbors.size())];
-
-                //cout <<"star2: "<<" "<<self<<": "<<last<<" "<<next<<endl;;
-                double angle = angleOnVertex(v[last], v[self], v[next])*180/PI;
-                double dX = (v[next].x - v[last].x);
-                double dY = (v[next].y - v[last].y);
-
-                if(angle > 130){
-                    double rat = 10000/angle;
-
-                    disCheckMovePlan(self, v, f, dY/rat, -dX/rat, ANGLEMODE);
-
-                }else if(angle < 30){
-                    double rat = 100;
-                    
-                    disCheckMovePlan(self, v, f, -dY/rat,  dX/rat, ANGLEMODE);
-
-                }
-
-                double rat = 100;
-                double leftDist = pow(v[last].x-v[self].x, 2) + pow(v[last].y-v[self].y, 2);
-                double rightDist = pow(v[next].x-v[self].x, 2) + pow(v[next].y-v[self].y,2);
-
-                double selfOffX = 0, selfOffY =0;
-                if(leftDist / rightDist > ar){
-                    selfOffX = -dX/rat;
-                    selfOffY = -dY/rat;
-                    disCheckMovePlan(self, v, f, selfOffX, selfOffY, ARMODE);
-                }else if(rightDist / leftDist > ar){
-                    selfOffX = dX/rat;
-                    selfOffY = dY/rat;
-                    disCheckMovePlan(self, v, f, selfOffX, selfOffY, ARMODE);
-                }
-            }// end of this corner/neighbor face
-            if(v[i].planCount){
-                disCheckMove(i, v, f, v[i].xPlan/v[i].planCount-v[i].x, v[i].yPlan/v[i].planCount-v[i].y);
-
-                v[i].xPlan = 0;
-                v[i].yPlan = 0;
-                v[i].planCount = 0;
-            }
-        }// end of boundary check
-
-    }// end of this vertex
 
 }
 

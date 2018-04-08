@@ -138,53 +138,70 @@ int readIn(vector<vertex> &v,vector<edge> &e,vector<face> &f, string filename){
 
 
 
-    /*for (int i = 0; i < v.size(); ++i)
-    {
-    	cout << i <<": ";
 
-            for(int p = 0; p<v[i].neighbors.size(); p++)   
-                cout << v[i].neighbors[p] <<" ";
-            cout <<"endiput"<< endl;
-    }
+    return 1;
+}
 
-    cout <<"endiput"<< endl;*/
+void clearNeighborFaceFormat(vector<vertex> &v,vector<edge> &e,vector<face> &f){
+        // clear out format of neighbor faces
 
-    // clear out format of neighbor faces, get rid of repetitive vertices in v[i].neighbors
-    for (int i=0; i<v.size(); i++) {
+   for (int i=0; i<v.size(); i++) {
         if(v[i].onBound == 0){
-            vector<int> neighborTemp;
+            vector<int> neighborTemp, neighborRet;
             //cout << "v[i].numOfNeighborFace" << v[i].numOfNeighborFace<<endl;
             //if(v[i].numOfNeighborFace == 0)
             //    cout << i<<endl;
             int numofelements = v[i].neighbors.size()/v[i].numOfNeighborFace;
             int j = numofelements;
             //cout << i <<" n.size "<< v[i].neighbors.size() << " nsize "<< v[i].numOfNeighborFace<<endl ;
-            for(int k = 0; k< numofelements; k++)
+            for(int k = 0; k< v[i].numOfNeighborFace; k++){
                 neighborTemp.push_back(v[i].neighbors[k]);
+            }
 
-            while (neighborTemp.size() < v[i].numOfNeighborFace*(numofelements -1)){
-                if(v[i].neighbors[j] == neighborTemp.back()){
+            //cout << i <<" asc: "<< neighborRet.size() << 
+             //   " asc: "<< v[i].numOfNeighborFace*(numofelements -1)+1 <<endl;
+
+            for(int k = 0; k< numofelements; k++)
+                neighborRet.push_back(v[i].neighbors[k]);
+                    
+            /*for(int p = 0; p<v[i].neighbors.size(); p++)   
+                cout << v[i].neighbors[p] <<" ";
+            cout <<"start " << endl;
+*/
+            while (neighborRet.size() < v[i].numOfNeighborFace*(numofelements -1)+1){
+                // if current v is the last of new neighbor array
+                // add the next numofelements-1
+                if(v[i].neighbors[j] == neighborRet.back()){
                     for(int k = 0; k< numofelements-1; k++){
-                        if(v[i].neighbors[j+k+1] != neighborTemp[0])
-                            neighborTemp.push_back(v[i].neighbors[j+k+1]);
+                        neighborRet.push_back(v[i].neighbors[j+k+1]);
+                        //cout << neighborRet.back()<<endl;
                     }
+                // if start match but end not, flip the face
+                }else if(( (v[i].neighbors[j] == neighborRet[neighborRet.size()-numofelements]) 
+                    && (v[i].neighbors[j+numofelements-1] != neighborRet.back()) )
+                    ||
+                    ( (v[i].neighbors[j] != neighborRet[neighborRet.size()-numofelements]) 
+                    && (v[i].neighbors[j+numofelements-1] == neighborRet.back()) ) )
+                {
+                    //cout <<v[i].neighbors[j]<<endl;
+                    for(int k = numofelements-1 ; k>0; k--)
+                        neighborRet.push_back(v[i].neighbors[j+k+1]);
+                // if end match but end not, flip the face
                 }
                 j += numofelements;
                 j = j%(v[i].neighbors.size());
+                //cout <<"j: "<<neighborTemp.size()<<" "<<v[i].numOfNeighborFace*(numofelements -1) <<endl;
             }
-            v[i].neighbors = neighborTemp;
-            
-            /*cout << i <<": ";
+            v[i].neighbors = neighborRet;
 
-            for(int p = 0; p<v[i].neighbors.size(); p++)   
-                cout << v[i].neighbors[p] <<" ";
-            cout <<"endiput"<< endl;*/
+            //for(int p = 0; p<v[i].neighbors.size(); p++)   
+             //   cout << v[i].neighbors[p] <<" ";
+            //cout <<"endiput progress:" << (i+0.0)/v.size()<< endl;
         }
     }
 
+    cout <<"endiput 2"<< endl;
 
-
-    return 1;
 }
 
 
@@ -379,8 +396,7 @@ double findShortestDistInStarT(vector<vertex> &v, vector<face> &f, double theX, 
 
         if(i == 0)
             distFinal = distTemp1;
-        if(distFinal > distTemp1)
-        	distFinal = distTemp1;
+        if(distFinal > distTemp1);
     }
 
     return distFinal;
